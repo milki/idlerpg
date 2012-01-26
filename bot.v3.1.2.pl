@@ -80,7 +80,6 @@ GetOptions(\%opts,
     "owneraddonly",
     "ownerdelonly",
     "ownerpevalonly",
-    "checkupdates",
     "senduserlist",
     "limitpen=i",
     "mapx=i",
@@ -178,40 +177,6 @@ if (! -e $opts{dbfile}) {
     }
     writedb();
     print "OK, wrote you into $opts{dbfile}.\n";
-}
-
-# this is almost silly...
-if ($opts{checkupdates}) {
-    print "Checking for updates...\n\n";
-    my $tempsock = IO::Socket::INET->new(PeerAddr=>"jotun.ultrazone.org:80",
-                                         Timeout => 15);
-    if ($tempsock) {
-        print $tempsock "GET /g7/version.php?version=$version HTTP/1.1\r\n".
-                        "Host: jotun.ultrazone.org:80\r\n\r\n";
-        my($line,$newversion);
-        while ($line=<$tempsock>) {
-            chomp($line);
-            next() unless $line;
-            if ($line =~ /^Current version : (\S+)/) {
-                if ($version ne $1) {
-                    print "There is an update available! Changes include:\n";
-                    $newversion=1;
-                }
-                else {
-                    print "You are running the latest version (v$1).\n";
-                    close($tempsock);
-                    last();
-                }
-            }
-            elsif ($newversion && $line =~ /^(  -? .+)/) { print "$1\n"; }
-            elsif ($newversion && $line =~ /^URL: (.+)/) {
-                print "\nGet the newest version from $1!\n";
-                close($tempsock);
-                last();
-            }
-        }
-    }
-    else { print debug("Could not connect to update server.")."\n"; }
 }
 
 print "\n".debug("Becoming a daemon...")."\n";
