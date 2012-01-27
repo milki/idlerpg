@@ -30,11 +30,14 @@ use strict;
 use warnings;
 use IO::Socket;
 use IO::Socket::INET;
+use IO::Select;
 use Data::Dumper;
 use Getopt::Long;
 
 my %opts;
+
 my $sslstatus = 0;
+my $sel; # IO::Select object
 
 # Check for IO::Socket::SSL
 eval { require IO::Socket::SSL; };
@@ -200,7 +203,6 @@ while (!$sock && $conn_tries < 2*@{$opts{servers}}) {
     my %sockinfo = (
         PeerAddr => $opts{servers}->[0],
         Proto => 'tcp',
-        Blocking => 0,
     );
     if ($opts{localaddr}) { $sockinfo{LocalAddr} = $opts{localaddr}; }
 
@@ -227,7 +229,10 @@ while (!$sock && $conn_tries < 2*@{$opts{servers}}) {
 
 if (!$sock) {
     debug("Error: Too many connection failures, exhausted server list.\n",1);
+    exit 1;
 }
+
+$sel = IO::Select->new($sock);
 
 $conn_tries=0;
 
@@ -235,28 +240,43 @@ sts("NICK $opts{botnick}");
 sts("USER $opts{botuser} 0 0 :$opts{botrlnm}");
 
 while (1) {
-    if( defined(my $line = $sock->getline()) ) {
-        parse($line);
-    } elsif( ! $sock->connected() ) {
-        # uh oh, we've been disconnected from the server, possibly before
-        # we've logged in the users in %auto_login. so, we'll set those
-        # users' online flags to 1, rewrite db, and attempt to reconnect
-        # (if that's wanted of us)
-        $rps{$_}{online}=1 for keys(%auto_login);
-        writedb();
-
-        if ($opts{reconnect}) {
-            undef(@queue);
-            undef($sock);
-            debug("Socket closed; disconnected. Cleared outgoing message ".
-                  "queue. Waiting $opts{reconnect_wait}s before next ".
-                  "connection attempt...");
-            sleep($opts{reconnect_wait});
-            goto CONNECT;
+    my($readable) = IO::Select->select($sel,undef,undef,0.5);
+    if (defined($readable)) {
+        my $fh = $readable->[0];
+        my $buffer2;
+        sysread($sock, $buffer2, 512);
+        if (length($buffer2)) {
+            $buffer .= $buffer2;
+            while (index($buffer,"\n") != -1) {
+                my $line = substr($buffer,0,index($buffer,"\n")+1);
+                $buffer = substr($buffer,length($line));
+                parse($line);
+            }
         }
-        else { debug("Socket closed; disconnected.",1); }
-        $sock->clearerr();
+        else {
+            # uh oh, we've been disconnected from the server, possibly before
+            # we've logged in the users in %auto_login. so, we'll set those
+            # users' online flags to 1, rewrite db, and attempt to reconnect
+            # (if that's wanted of us)
+            $rps{$_}{online}=1 for keys(%auto_login);
+            writedb();
+
+            close($fh);
+            $sel->remove($fh);
+
+            if ($opts{reconnect}) {
+                undef(@queue);
+                undef($sock);
+                debug("Socket closed; disconnected. Cleared outgoing message ".
+                      "queue. Waiting $opts{reconnect_wait}s before next ".
+                      "connection attempt...");
+                sleep($opts{reconnect_wait});
+                goto CONNECT;
+            }
+            else { debug("Socket closed; disconnected.",1); }
+        }
     }
+    else { select(undef,undef,undef,1); }
     if ((time()-$lasttime) >= $opts{self_clock}) { rpcheck(); }
 }
 
