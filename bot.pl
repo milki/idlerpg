@@ -29,7 +29,6 @@
 use strict;
 use warnings;
 use IO::Socket;
-use IO::Select;
 use Data::Dumper;
 use Getopt::Long;
 
@@ -121,7 +120,6 @@ my @queue; # outgoing message queue
 my $lastreg = 0; # holds the time of the last reg. cleared every second.
                  # prevents more than one account being registered / second
 my $registrations = 0; # count of registrations this period
-my $sel; # IO::Select object
 my $lasttime = 1; # last time that rpcheck() was run
 my $buffer; # buffer for socket stuff
 my $conn_tries = 0; # number of connection tries. gives up after trying each
@@ -208,49 +206,33 @@ if (!$sock) {
 
 $conn_tries=0;
 
-$sel = IO::Select->new($sock);
-
 sts("NICK $opts{botnick}");
 sts("USER $opts{botuser} 0 0 :$opts{botrlnm}");
 
 while (1) {
-    my($readable) = IO::Select->select($sel,undef,undef,0.5);
-    if (defined($readable)) {
-        my $fh = $readable->[0];
-        my $buffer2;
-        $fh->recv($buffer2,512,0);
-        if (length($buffer2)) {
-            $buffer .= $buffer2;
-            while (index($buffer,"\n") != -1) {
-                my $line = substr($buffer,0,index($buffer,"\n")+1);
-                $buffer = substr($buffer,length($line));
-                parse($line);
-            }
-        }
-        else {
-            # uh oh, we've been disconnected from the server, possibly before
-            # we've logged in the users in %auto_login. so, we'll set those
-            # users' online flags to 1, rewrite db, and attempt to reconnect
-            # (if that's wanted of us)
-            $rps{$_}{online}=1 for keys(%auto_login);
-            writedb();
+    if( defined(my $line = $sock->getline()) ) {
+        parse($line);
+    } elsif( ! $sock->connected() ) {
+        debug("error!");
+        # uh oh, we've been disconnected from the server, possibly before
+        # we've logged in the users in %auto_login. so, we'll set those
+        # users' online flags to 1, rewrite db, and attempt to reconnect
+        # (if that's wanted of us)
+        $rps{$_}{online}=1 for keys(%auto_login);
+        writedb();
 
-            close($fh);
-            $sel->remove($fh);
-
-            if ($opts{reconnect}) {
-                undef(@queue);
-                undef($sock);
-                debug("Socket closed; disconnected. Cleared outgoing message ".
-                      "queue. Waiting $opts{reconnect_wait}s before next ".
-                      "connection attempt...");
-                sleep($opts{reconnect_wait});
-                goto CONNECT;
-            }
-            else { debug("Socket closed; disconnected.",1); }
+        if ($opts{reconnect}) {
+            undef(@queue);
+            undef($sock);
+            debug("Socket closed; disconnected. Cleared outgoing message ".
+                  "queue. Waiting $opts{reconnect_wait}s before next ".
+                  "connection attempt...");
+            sleep($opts{reconnect_wait});
+            goto CONNECT;
         }
+        else { debug("Socket closed; disconnected.",1); }
+        $sock->clearerr();
     }
-    else { select(undef,undef,undef,1); }
     if ((time()-$lasttime) >= $opts{self_clock}) { rpcheck(); }
 }
 
