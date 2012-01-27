@@ -75,7 +75,6 @@ GetOptions(\%opts,
     "splitwait=i",
     "allowuserinfo",
     "noscale",
-    "phonehome",
     "owner=s",
     "owneraddonly",
     "ownerdelonly",
@@ -509,17 +508,6 @@ sub parse {
                                 "can idle the longest. As such, talking in ".
                                 "the channel, parting, quitting, and changing ".
                                 "nicks all penalize you.",$usernick);
-                        if ($opts{phonehome}) {
-                            my $tempsock = IO::Socket::INET->new(PeerAddr=>
-                                "jotun.ultrazone.org:80");
-                            if ($tempsock) {
-                                print $tempsock
-                                    "GET /g7/count.php?new=1 HTTP/1.1\r\n".
-                                    "Host: jotun.ultrazone.org:80\r\n\r\n";
-                                sleep(1);
-                                close($tempsock);
-                            }
-                        }
                     }
                 }
             }
