@@ -190,8 +190,7 @@ loaddb();
 
 while (!$sock && $conn_tries < 2*@{$opts{servers}}) {
     debug("Connecting to $opts{servers}->[0]...");
-    my %sockinfo = (PeerAddr => $opts{servers}->[0],
-                    PeerPort => 6667);
+    my %sockinfo = (PeerAddr => $opts{servers}->[0])
     if ($opts{localaddr}) { $sockinfo{LocalAddr} = $opts{localaddr}; }
     $sock = IO::Socket::INET->new(%sockinfo) or
         debug("Error: failed to connect: $!\n");
