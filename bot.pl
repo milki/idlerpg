@@ -29,10 +29,18 @@
 use strict;
 use warnings;
 use IO::Socket;
+use IO::Socket::INET;
 use Data::Dumper;
 use Getopt::Long;
 
 my %opts;
+my $sslstatus = 0;
+
+# Check for IO::Socket::SSL
+eval { require IO::Socket::SSL; };
+if (! $@) {
+    $sslstatus = 1;
+}
 
 readconfig();
 
@@ -45,6 +53,7 @@ GetOptions(\%opts,
     "debug",
     "debugfile=s",
     "server|s=s",
+    "usessl=i",
     "botnick|n=s",
     "botuser|u=s",
     "botrlnm|r=s",
@@ -124,7 +133,7 @@ my $lasttime = 1; # last time that rpcheck() was run
 my $buffer; # buffer for socket stuff
 my $conn_tries = 0; # number of connection tries. gives up after trying each
                     # server twice
-my $sock; # IO::Socket::INET object
+my $sock; # IO::Socket object
 my %split; # holds nick!user@hosts for clients that have been netsplit
 my $freemessages = 4; # number of "free" privmsgs we can send. 0..$freemessages
 
@@ -187,17 +196,29 @@ CONNECT: # cheese.
 loaddb();
 
 while (!$sock && $conn_tries < 2*@{$opts{servers}}) {
-    debug("Connecting to $opts{servers}->[0]...");
-    my %sockinfo = (PeerAddr => $opts{servers}->[0])
+    debug("Connecting to $opts{servers}->[0] ssl: $opts{usessl}->[0]...");
+    my %sockinfo = (PeerAddr => $opts{servers}->[0], Proto => 'tcp');
     if ($opts{localaddr}) { $sockinfo{LocalAddr} = $opts{localaddr}; }
-    $sock = IO::Socket::INET->new(%sockinfo) or
-        debug("Error: failed to connect: $!\n");
+
+    if( $opts{usessl}->[0] ) {
+        if( $sslstatus ) {
+            $sock = IO::Socket::SSL->new(%sockinfo) or
+                debug("Error: failed to connect: $!\n");
+        } else {
+            debug("SSL not available. Install IO::Socket::SSL.")
+        }
+    } else {
+        $sock = IO::Socket::INET->new(%sockinfo) or
+            debug("Error: failed to connect: $!\n");
+    }
     ++$conn_tries;
     if (!$sock) {
         # cycle front server to back if connection failed
         push(@{$opts{servers}},shift(@{$opts{servers}}));
+        push(@{$opts{usessl}},shift(@{$opts{usessl}}));
     }
     else { debug("Connected."); }
+    # TODO: Detect when connecting to SSL required server without SSL
 }
 
 if (!$sock) {
@@ -213,7 +234,6 @@ while (1) {
     if( defined(my $line = $sock->getline()) ) {
         parse($line);
     } elsif( ! $sock->connected() ) {
-        debug("error!");
         # uh oh, we've been disconnected from the server, possibly before
         # we've logged in the users in %auto_login. so, we'll set those
         # users' online flags to 1, rewrite db, and attempt to reconnect
@@ -2280,6 +2300,7 @@ sub readconfig {
                     "yet.\n");
             }
             elsif ($key eq "server") { push(@{$opts{servers}},$val); }
+            elsif ($key eq "usessl") { push(@{$opts{usessl}},$val); }
             elsif ($key eq "okurl") { push(@{$opts{okurl}},$val); }
             else { $opts{$key} = $val; }
         }

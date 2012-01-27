@@ -13,6 +13,7 @@ comments, or post them in the forum on the website for public view.
   - Remove update check (site is dead)
   - Remove phonehome (site is dead)
   - Remove static port 6667. config file specifies host:port
+  - Add SSL support with usessl via IO::Socket::SSL
 
 --------------------------------------------------------------------------------
   v3.1.2: released 6/6/04
