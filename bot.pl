@@ -197,7 +197,11 @@ loaddb();
 
 while (!$sock && $conn_tries < 2*@{$opts{servers}}) {
     debug("Connecting to $opts{servers}->[0] ssl: $opts{usessl}->[0]...");
-    my %sockinfo = (PeerAddr => $opts{servers}->[0], Proto => 'tcp');
+    my %sockinfo = (
+        PeerAddr => $opts{servers}->[0],
+        Proto => 'tcp',
+        Blocking => 0,
+    );
     if ($opts{localaddr}) { $sockinfo{LocalAddr} = $opts{localaddr}; }
 
     if( $opts{usessl}->[0] ) {
