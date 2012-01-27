@@ -1,10 +1,17 @@
-This is the changelog for the Idle RPG bot by jotun, jotun@idlerpg.net,
+This is the changelog for the Idle RPG bot by milki
+Based pff the original Idle RPG bot from v3.1.2 by jotun, jotun@idlerpg.net,
 http://idlerpg.net. Entries are written backwards. That is, items at the bottom
 of the file were added first, and each subsequent addition is placed on a line
 before it. Don't ask me why I do it that way: I do not know.
 
 Thanks for your interest in the Idle RPG! Feel free to contact me with ideas and
 comments, or post them in the forum on the website for public view.
+
+--------------------------------------------------------------------------------
+  v3.2.0:
+--------------------------------------------------------------------------------
+  - Remove update check (site is dead)
+  - Remove phonehome (site is dead)
 
 --------------------------------------------------------------------------------
   v3.1.2: released 6/6/04
