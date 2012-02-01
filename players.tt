@@ -1,0 +1,25 @@
+[% INCLUDE 'header.tt'
+    title = irpg_page_title
+    irpg_logo = irpg_logo
+    irpg_chan = irpg_chan
+    baseurl = baseurl
+%]
+
+    <div class="content">
+
+  <h1>Players</h1>
+  <ol>
+[% FOREACH player IN players %]
+    [% INCLUDE 'player_row.tt'
+        baseurl = baseurl
+        name    = player.name
+        class   = player.class
+        level   = player.level
+        time    = player.time
+        status  = player.status %]
+[% END %]
+  </ol>
+
+    </div>
+
+[% INCLUDE 'footer.tt' %]

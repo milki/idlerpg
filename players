@@ -1,0 +1,118 @@
+#!/usr/bin/perl -w
+
+use strict;
+use warnings;
+
+use HTML::Entities qw(:DEFAULT encode_entities_numeric);
+use HTML::Entities::Numbered ();
+
+use CGI;
+use AppConfig qw(:expand :argcount);
+use Template;
+
+
+my $config_path     = 'irpg.conf';
+my $template_path   = 'players.tt';
+
+my $cgi             = CGI->new;
+my $config          = get_config();
+my $template        = Template->new(ABSOLUTE => 'f');
+
+main();
+
+sub main {
+    my $players = process_players();
+
+    my $html = $cgi->header();
+    $template->process( $template_path, {
+            irpg_page_title => 'Game Info',
+            baseurl         => $config->baseurl(),
+            irpg_logo       => $config->logo(),
+            irpg_bot        => $config->botname(),
+            irpg_chan       => $config->botchan(),
+            players         => $players
+        }, \$html) || die;
+    print $html;
+}
+
+sub process_players {
+    open(FILE,"<" . $config->db());
+    my @rawplayers = <FILE>;
+    close(FILE);
+
+    shift @rawplayers;
+    @rawplayers = sort cmp_level @rawplayers;
+
+    my @players;
+    my @stats;
+    my $html_entities = '_\?\^<>"#';
+    my ($class,$username,$user,$userlink,$nextlevel);
+
+    # Format is $user[0],,,$level[3],$class[4],$secs[5],,,$online[8]
+    foreach my $player (@rawplayers) {
+        @stats = split /\t/, $player;
+
+        $class = HTML::Entities::encode_numeric($stats[4],$html_entities);
+        $username = $stats[0];
+        $user = HTML::Entities::encode_numeric($stats[0],$html_entities);
+        $user = HTML::Entities::Numbered::decimal2name($user);
+        $user =~ s/&#x/%/g;
+        $user =~ s/;//g;
+
+        $nextlevel = duration($stats[5]);
+
+        push @players, {
+            name    => $user,
+            class   => $class,
+            level   => $stats[3],
+            time    => $nextlevel,
+            status  => $stats[8]
+        };
+        warn $players[-1]->{name};
+    }
+    return \@players;
+}
+
+
+# Format is ,,,$level[3],,$time[5]
+sub cmp_level {
+    my @playerA = split /\t/, $a;
+    my @playerB = split /\t/, $b;
+    my $level1 = $playerA[3]+0;
+    my $level2 = $playerB[3]+0;
+    my $sec1 = $playerA[5]+0;
+    my $sec2 = $playerB[5]+0;
+    if( $level1 == $level2 ) {
+        return ($sec1 <= $sec2) ? -1 : 1;
+    }
+    return ($level1 > $level2) ? -1 : 1;
+}
+
+sub duration {
+    my $seconds = abs (int shift);
+    return "None" unless ($seconds);
+    return sprintf("%d day%s, %02d:%02d:%02d",
+                   $seconds/86400,int($seconds/86400)==1?"":"s",
+                   ($seconds%86400)/3600,($seconds%3600)/60,$seconds%60);
+}
+
+sub get_config {
+    my $conf = AppConfig->new({
+            CASE    => 1,
+            GLOBAL  => {
+                DEFAULT     => undef,
+                ARGCOUNT    => ARGCOUNT_ONE,
+            },
+        });
+    $conf->define(
+        'baseurl',
+        'logo',
+        'db',
+        'botname',
+        'server',
+        'botchan',
+    );
+    $conf->file($config_path);
+
+    return $conf;
+}

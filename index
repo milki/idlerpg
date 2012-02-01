@@ -1,0 +1,51 @@
+#!/usr/bin/perl -w
+
+use strict;
+use warnings;
+
+use CGI;
+use AppConfig qw(:expand :argcount);
+use Template;
+
+
+my $config_path     = 'irpg.conf';
+my $template_path   = 'index.tt';
+
+my $cgi             = CGI->new;
+my $config          = get_config();
+my $template        = Template->new(ABSOLUTE => 'f');
+
+main();
+
+sub main {
+    my $html = $cgi->header();
+    $template->process( $template_path, {
+            irpg_page_title => 'Game Info',
+            baseurl         => $config->baseurl(),
+            irpg_logo       => $config->logo(),
+            irpg_bot        => $config->botname(),
+            irpg_chan       => $config->botchan(),
+        }, \$html) || die;
+    print $html;
+}
+
+sub get_config {
+    my $conf = AppConfig->new({
+            CASE    => 1,
+            GLOBAL  => {
+                DEFAULT     => undef,
+                ARGCOUNT    => ARGCOUNT_ONE,
+            },
+        });
+    $conf->define(
+        'baseurl',
+        'logo',
+        'db',
+        'botname',
+        'server',
+        'botchan',
+    );
+    $conf->file($config_path);
+
+    return $conf;
+}

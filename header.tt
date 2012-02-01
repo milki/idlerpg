@@ -1,0 +1,18 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1 Strict//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html><head><title>#[% irpg_chan %] Idle RPG: Game Info</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <link rel="stylesheet" type="text/css" href="/css/idlerpg.css"></head><body>
+
+    <!-- Idle RPG Logo -->
+
+    <div class="head">
+        <img src="[% irpg_logo %]" alt="#[% irpg_chan %] Idle RPG" title="#[% irpg_chan %] Idle RPG" height="115" width="338" />
+    </div>
+
+    <div id="menu" class="menu">
+        <a href="[% baseurl %]/index">Game Info</a>
+        <a href="[% baseurl %]/players">Player Info</a>
+        <a href="[% baseurl %]/worldmap">World Map</a>
+        <a href="#" style="text-decoration: line-through;">Quest Info</a>
+    </div>
+

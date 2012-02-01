@@ -1,0 +1,152 @@
+body { 
+    font-family: "Trebuchet MS", Arial, Helvetica, sans-serif; 
+    font-size : small ;
+    background-color: #FFFFF0;
+    color: black;
+    margin: 10px;
+    text-align: justify;
+}
+
+h1 { margin-bottom: 0px; margin-top: 0px; }
+h2 { margin-bottom: 0px; }
+
+p.small { margin: 0px; font-size: smaller; }
+
+a { text-decoration: none; color: #C69500; }
+a:hover { text-decoration: underline; color: black; }
+
+div.head {
+   border: 1px solid #c0c0c0;
+   text-align: left;
+   width: 100%;
+   margin-bottom: 10px;
+   background: #FFFFFF;
+}
+
+div.menu {
+   width: 120px;
+   position: relative;
+   float: left;
+   border: 1px solid #c0c0c0;
+   background: #FFFFFF;
+}
+div#menu a.home { color: #000000; background: #c0c0c0; border: 1px solid #000000; }
+div#menu a.home:hover { background: #c0c0c0; border: 1px solid #000000; }
+div#menu a {
+   text-align: center;
+   width: 118px;
+   margin: 0px;
+   display: block;
+   border: 1px solid #FFFFFF
+}
+
+div#menu a:hover { border: 1px solid #000000; background: #c0c0c0; text-decoration: none; }
+
+div.content {
+   border: 1px solid #c0c0c0; 
+   margin-left: 130px;
+   margin-top: 0px;
+   padding: 10px;
+   background: #FFFFFF;
+}
+
+div.footer {
+   border: 1px solid #c0c0c0; 
+   margin-left: 130px;
+   margin-top: 10px;
+   padding: 10px;
+   background: #FFFFFF;
+}
+
+/* Weapons List */
+
+div#weapons { float : left ; }
+
+div#weapons dl {
+    height : 8em ;
+    width : 23em ;
+    display : block ;
+    float : left ;
+}
+
+div#weapons dt {
+    float : left ;
+    font-weight : bold ;
+    clear : left ;
+}
+div#weapons dt:after { content: ":" }
+
+div#weapons dd {
+    float : left ;
+    clear : right ;
+}
+
+table.penalty {
+   border: 1px solid #c0c0c0;
+   padding: 5px;
+   text-align: left;
+}
+table.penalty th {
+   text-align: right;
+}
+
+ul#modlist {
+    padding : 0 ;
+    margin : 0 ;
+}
+
+ul#modlist ul {
+    list-style : none ;
+    overflow : hidden ;
+    background-color : #CCC ;
+    border-top : 1px solid #EEE ;
+    border-right : 1px solid #EEE ;
+    border-bottom : 1px solid #555 ;
+    border-left : 1px solid #555 ;
+    display : block ;
+    margin : 0 ;
+}
+
+ul#modlist li {
+    float : left ;
+    padding : 0 0.6em 0 0.6em ;
+    border-left : 1px solid #AAA ;
+}
+
+ul#modlist li.moddate { width : 10em ; }
+ul#modlist li.modtype { width : 21em ; }
+ul#modlist li.modresult { width : 25em ; }
+
+/* Styles for the userlist */
+li.online { font-weight: bold; }
+li.offline { color: #c0c0c0; }
+a.offline { color: #707070; }
+
+font.unique { color: #BE9256; }
+
+#map {
+    width: 500px;
+    height: 500px;
+    background-image: url(newmap.png);
+}
+
+
+table.forum {
+    border: 1px solid #c0c0c0;
+    table-layout: fixed;
+    overflow: auto;
+}
+
+table.forum td,tr,caption,thead,tfoot,th {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+.tdblue { background-color: #ffffdf; }
+.tdgray { background-color: #eeeee0; }
+.tdred {
+    border: 1px solid red;
+    background-color: #FFCCCC;
+}
+.smallest {
+    font-size: 11px;
+}
