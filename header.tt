@@ -1,12 +1,12 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1 Strict//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
-<html><head><title>#[% irpg_chan %] Idle RPG: Game Info</title>
+<html><head><title>#[% irpg_chan %] Idle RPG: [% irpg_page_title %]</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <link rel="stylesheet" type="text/css" href="/css/idlerpg.css"></head><body>
 
     <!-- Idle RPG Logo -->
 
     <div class="head">
-        <img src="[% irpg_logo %]" alt="#[% irpg_chan %] Idle RPG" title="#[% irpg_chan %] Idle RPG" height="115" width="338" />
+        <img src="[% irpg_logo %]" alt="#[% irpg_chan %] Idle RPG" title="#[% irpg_chan %] Idle RPG" />
     </div>
 
     <div id="menu" class="menu">
