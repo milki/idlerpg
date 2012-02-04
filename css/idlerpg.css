@@ -1,6 +1,5 @@
 body { 
-    font-family: "Trebuchet MS", Arial, Helvetica, sans-serif; 
-    font-size : small ;
+    font-family: sans-serif, serif;
     background-color: #FFFFF0;
     color: black;
     margin: 10px;
@@ -91,26 +90,13 @@ table.penalty th {
 }
 
 ul#modlist {
-    padding : 0 ;
-    margin : 0 ;
-}
-
-ul#modlist ul {
     list-style : none ;
-    overflow : hidden ;
-    background-color : #CCC ;
-    border-top : 1px solid #EEE ;
-    border-right : 1px solid #EEE ;
-    border-bottom : 1px solid #555 ;
-    border-left : 1px solid #555 ;
-    display : block ;
     margin : 0 ;
 }
 
 ul#modlist li {
-    float : left ;
     padding : 0 0.6em 0 0.6em ;
-    border-left : 1px solid #AAA ;
+    clear: both;
 }
 
 ul#modlist li.moddate { width : 10em ; }
@@ -149,4 +135,28 @@ table.forum td,tr,caption,thead,tfoot,th {
 }
 .smallest {
     font-size: 11px;
+}
+
+dl {
+    clear: both;
+}
+
+dt {
+    float: left; 
+    width: 200px;
+    text-align: right;
+    font-weight: bold;
+  }
+
+dt:after {
+  content: ":";
+  padding-right: 10px;
+}
+
+dd {
+    margin-left: 0;
+}
+
+dl h3 {
+    display: inline;
 }

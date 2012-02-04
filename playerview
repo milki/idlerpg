@@ -1,0 +1,135 @@
+#!/usr/bin/perl -w
+
+use strict;
+use warnings;
+
+use HTML::Entities;
+
+use CGI;
+use Template;
+
+use lib qw(./lib);
+use IdleRPG::Config;
+
+my $template_path   = 'playerview.tt';
+
+my $cgi             = CGI->new;
+my $config          = IdleRPG::Config::get_config();
+my $template        = Template->new(ABSOLUTE => 'f');
+
+my $player_name     = $cgi->param('player');
+
+main();
+
+sub main {
+    die if $player_name eq '';
+
+    my $player = process_player();
+    my $mods = process_modifiers();
+
+    my $html = $cgi->header();
+    $template->process( $template_path, {
+            irpg_page_title => "Player $player_name",
+            baseurl         => $config->baseurl(),
+            irpg_logo       => $config->logo(),
+            player          => $player,
+            mods            => $mods
+        }, \$html) || die;
+    print $html;
+}
+
+sub process_player {
+    # Read Database
+    open(FILE, "<" . $config->db());
+    my @raw_players = <FILE>;
+    close(FILE);
+
+    shift @raw_players;
+
+
+    my $player = {};
+    my @stats;
+    my ($user,$level,$nextlevel,$class,$secs,$online,$idled,$x,$y,$pen,$created,$lastlogin,$items,$alignment);
+    # Format is $user[0],,$level[3],$class[4],$secs[5],,$online[8],$idled[9],$x[10],$y[11],$pen{mesg}[12],$pen{nick}[13],$pen{part}[14],$pen{kick}[15],$pen{quit}[16],$pen{quest}[17],$pen{logout}[18],$created[19],$lastlogin[20],$item{amulet}[21],$item{charm}[22],$item{helm}[23],$item{boots}[24],$item{gloves}[25],$item{ring}[26],$item{leggings}[27],$item{shield}[28],$item{tunic}[29],$item{weapon}[30],$alignment[31]
+    foreach my $raw_player (@raw_players) {
+        @stats = split /\t/, $raw_player;
+
+        next unless( $stats[0] eq $player_name );
+
+        $player->{name}         = HTML::Entities::encode_entities($stats[0]);
+        $player->{level}        = $stats[3];
+        $player->{class}        = HTML::Entities::encode_entities($stats[4]);
+        $player->{ttl}          = duration($stats[5]);
+        $player->{status}       = $stats[8] ? 'Online': 'Offline';
+        $player->{idled}        = duration($stats[9]);
+        $player->{xpos}         = $stats[10];
+        $player->{ypos}         = $stats[11];
+        $player->{alignment}    = $stats[31] =~ /e/ ? 'Evil' : ($stats[31] =~ /n/ ? 'Neutral' : 'Good');
+
+        my %items        = (
+            amulet  =>  $stats[21],
+            charm   =>  $stats[22],
+            helm    =>  $stats[23],
+            boots   =>  $stats[24],
+            gloves  =>  $stats[25],
+            ring    =>  $stats[26],
+            leggings    =>  $stats[27],
+            shield  =>  $stats[28],
+            tunic   =>  $stats[29],
+            weapon  =>  $stats[30],
+            );
+
+        my $itemsum = 0;
+        while( my ($item, $value) = each %items ) {
+            $itemsum += $value;
+        }
+
+        $player->{items} = \%items;
+        $player->{itemsum} = $itemsum;
+
+        my %penalties = (
+            mesg    =>  $stats[12],
+            nick    =>  $stats[13],
+            part    =>  $stats[14],
+            kick    =>  $stats[15],
+            quit    =>  $stats[16],
+            quest   =>  $stats[17],
+            logout  =>  $stats[18],
+        );
+
+        my $penaltytotal = 0;
+        while( my ($item, $value) = each %penalties ) {
+            $penaltytotal += $value unless $value eq 'None';
+            $penalties{$item} = duration($value);
+        }
+
+        $player->{penalties} = \%penalties;
+        $player->{penaltytotal} = duration($penaltytotal);
+
+        return $player;
+    }
+}
+
+sub process_modifiers {
+
+    open (MODS, $config->modifiers());
+    my ($mod, @modlist);
+
+    my $user = quotemeta($player_name);
+    while (<MODS>) {
+        if( /$user/ ) {
+            push @modlist, HTML::Entities::encode_entities($_);
+        }
+    }
+    close(MODS);
+
+    return \@modlist;
+}
+
+sub duration {
+    my $seconds = abs (int shift);
+    return "None" unless ($seconds);
+    return sprintf("%d day%s, %02d:%02d:%02d",
+                   $seconds/86400,int($seconds/86400)==1?"":"s",
+                   ($seconds%86400)/3600,($seconds%3600)/60,$seconds%60);
+}

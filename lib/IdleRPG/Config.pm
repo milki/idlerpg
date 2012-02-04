@@ -31,6 +31,7 @@ sub _init {
             'baseurl',
             'logo',
             'db',
+            'modifiers',
             'botname',
             'server',
             'botchan',

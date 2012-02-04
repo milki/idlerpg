@@ -1,0 +1,7 @@
+baseurl     = URLHERE
+logo        = LOGO_FULLPATH
+db          = DB_FULLPATH
+modifiers   = MODIFIERS.TXT
+botname     = NAME
+server      = SERVER:PORT
+botchan     = CHANNEL

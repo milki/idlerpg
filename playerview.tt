@@ -1,0 +1,63 @@
+[% INCLUDE 'header.tt'
+    title = irpg_page_title
+    irpg_logo = irpg_logo
+    irpg_chan = irpg_chan
+    baseurl = baseurl
+%]
+    <div class="content">
+        <h1>Player Info</h1>
+        <dl>
+            <dt>User</dt>
+            <dd>[% player.name %]</dt>
+
+            <dt>Level</dt>
+            <dd>[% player.level %]</dd>
+
+            <dt>Class:</dt>
+            <dd>[% player.class %]</dd>
+
+            <dt>TTL</dt>
+            <dd>[% player.ttl %]</dd>
+
+            <dt>Status</dt>
+            <dd>[% player.status %]</dd>
+            
+            <dt>Total timed idled</dt>
+            <dd>[% player.idled %]</dd>
+
+            <dt>Current position</dt>
+            <dd>([% player.xpos %], [% player.ypos %])</dd>
+
+            <dt>Alignment</dt>
+            <dd>[% player.alignment %]</dd>
+        </dl>
+
+        <h2>Items</h2>
+        <dl>
+            [% FOREACH item IN player.items %]
+                <dt>[% item.key %]</dt>
+                <dd>[% item.value %]</dd>
+            [% END %]
+            <dt>Total</dt>
+            <dd>[% player.itemsum %]</dd>
+        </dl>
+
+        <h2>Penalties</h2>
+        <dl>
+        [% FOREACH penalty IN player.penalties %]
+            <dt>[% penalty.key %]</dt>
+            <dd>[% penalty.value %]</dd>
+        [% END %]
+        <dt>Total</dt>
+        <dd>[% player.penaltytotal %]</dd>
+        </dl>
+
+        <h2>Modifiers</h2>
+        <ul id="modlist">
+            [% FOREACH modifier IN mods %]
+            <li>[% modifier %]</li>
+            [% END %]
+        </ul>
+    </div>
+
+[% INCLUDE 'footer.tt' %]
