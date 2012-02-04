@@ -25,6 +25,7 @@ sub main {
             baseurl         => $config->baseurl(),
             irpg_logo       => $config->logo(),
             irpg_bot        => $config->botname(),
+            irpg_server     => $config->server(),
             irpg_chan       => $config->botchan(),
         }, \$html) || die;
     print $html;
