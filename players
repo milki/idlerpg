@@ -7,15 +7,15 @@ use HTML::Entities qw(:DEFAULT encode_entities_numeric);
 use HTML::Entities::Numbered ();
 
 use CGI;
-use AppConfig qw(:expand :argcount);
 use Template;
 
+use lib qw(./lib);
+use IdleRPG::Config;
 
-my $config_path     = 'irpg.conf';
 my $template_path   = 'players.tt';
 
 my $cgi             = CGI->new;
-my $config          = get_config();
+my $config          = IdleRPG::Config::get_config();
 my $template        = Template->new(ABSOLUTE => 'f');
 
 main();
@@ -94,25 +94,4 @@ sub duration {
     return sprintf("%d day%s, %02d:%02d:%02d",
                    $seconds/86400,int($seconds/86400)==1?"":"s",
                    ($seconds%86400)/3600,($seconds%3600)/60,$seconds%60);
-}
-
-sub get_config {
-    my $conf = AppConfig->new({
-            CASE    => 1,
-            GLOBAL  => {
-                DEFAULT     => undef,
-                ARGCOUNT    => ARGCOUNT_ONE,
-            },
-        });
-    $conf->define(
-        'baseurl',
-        'logo',
-        'db',
-        'botname',
-        'server',
-        'botchan',
-    );
-    $conf->file($config_path);
-
-    return $conf;
 }
