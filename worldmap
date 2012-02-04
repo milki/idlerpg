@@ -1,0 +1,79 @@
+#!/usr/bin/perl -w
+
+use strict;
+use warnings;
+
+use Image::Imlib2;
+use HTML::Entities;
+
+use CGI;
+use Template;
+
+use lib qw(./lib);
+use IdleRPG::Config;
+
+my $template_path   = 'worldmap.tt';
+
+my $cgi             = CGI->new;
+my $config          = IdleRPG::Config::get_config();
+my $template        = Template->new(ABSOLUTE => 'f');
+
+my $html_entities = '_\?\^<>"#';
+
+my @magenta = (255,0,255,255);
+my @blue = (0,128,255,255);
+my @red = (211,0,0,255);
+
+main();
+
+sub main {
+    my $links = process_players();
+
+    my $html = $cgi->header();
+    $template->process( $template_path, {
+            irpg_page_title => 'World Map',
+            baseurl         => $config->baseurl(),
+            irpg_logo       => $config->logo(),
+            irpg_bot        => $config->botname(),
+            irpg_server     => $config->server(),
+            irpg_chan       => $config->botchan(),
+            map             => $config->map_rel(),
+            links           => $links,
+        }, \$html) || die;
+    print $html;
+}
+
+sub process_players {
+    open(FILE,"<" . $config->db());
+    my @raw_players = <FILE>;
+    close(FILE);
+    shift @raw_players;
+
+    my $image = Image::Imlib2->load($config->map());
+
+    my @stats;
+    my ($user,$online,$x,$y);
+    my @links;
+    # Format is $user[0],,,,,,,,$online[8],,$x[10],$y[11]
+    foreach my $player (@raw_players) {
+        @stats = split /\t/, $player;
+
+        $user = HTML::Entities::encode_entities($stats[0],$html_entities); 
+
+        if( $stats[8] ) {
+            $image->set_colour(@blue);
+        } else {
+            $image->set_colour(@red);
+        }
+        $image->fill_ellipse($stats[10],$stats[11],3,3);
+
+        push @links, {
+            xpos => $stats[10],
+            ypos => $stats[11],
+            player => $user,
+        };
+    }
+
+    $image->save($config->outmap());
+    return \@links;
+}

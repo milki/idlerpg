@@ -113,7 +113,7 @@ font.unique { color: #BE9256; }
 #map {
     width: 500px;
     height: 500px;
-    background-image: url(newmap.png);
+    background-image: url(/images/worldmap.png);
 }
 
 

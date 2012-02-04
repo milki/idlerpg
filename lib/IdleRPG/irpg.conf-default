@@ -5,3 +5,6 @@ modifiers   = MODIFIERS.TXT
 botname     = NAME
 server      = SERVER:PORT
 botchan     = CHANNEL
+map         = SYSTEM_FULLPATH
+map_rel     = WEB_ABSPATH
+outmap      = SYSTEM_FULLPATH

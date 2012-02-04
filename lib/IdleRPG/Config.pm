@@ -35,6 +35,9 @@ sub _init {
             'botname',
             'server',
             'botchan',
+            'map',
+            'map_rel',
+            'outmap',
         );
         $config->file($CONFFILE);
 
