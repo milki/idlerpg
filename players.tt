@@ -10,13 +10,11 @@
   <h1>Players</h1>
   <ol>
 [% FOREACH player IN players %]
-    [% INCLUDE 'player_row.tt'
-        baseurl = baseurl
-        name    = player.name
-        class   = player.class
-        level   = player.level
-        time    = player.time
-        status  = player.status %]
+    <li class="[% player.status %]">
+        <a href="[% baseurl %]/playerview?player=[% player.name %]">[% player.name %]</a>,
+        the level [% player.level %] [% player.class %].
+        Next level in [% player.time %]</li>
+    </li>
 [% END %]
   </ol>
 
